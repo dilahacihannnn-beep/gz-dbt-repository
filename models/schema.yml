@@ -3,10 +3,57 @@ version: 2
 sources:
   - name: raw
     schema: gz_raw_data
+    description: raw data of Greenweez, an online organic products retailer
     tables:
+
       - name: sales
         identifier: raw_gz_sales
+        description: sales of Greenweez, one row per product in each order
+        config:
+          loaded_at_field: "cast(date_date as timestamp)"
+          freshness:
+            warn_after: {count: 90, period: day}
+        tests:
+          - unique:
+              column_name: "concat(cast(orders_id as string), '-', cast(pdt_id as string))"
+        columns:
+          - name: date_date
+            description: date of the purchase
+          - name: orders_id
+            description: identifier of the order
+          - name: pdt_id
+            description: identifier of the product
+          - name: revenue
+            description: revenue of the product in the order
+          - name: quantity
+            description: quantity of the product sold in the order
+
       - name: product
         identifier: raw_gz_product
+        description: products of Greenweez with their purchase price
+        columns:
+          - name: products_id
+            description: primary key of the table, identifier of the product
+            tests:
+              - unique
+              - not_null
+          - name: purchse_price
+            description: purchase price of the product
+
       - name: ship
         identifier: raw_gz_ship
+        description: shipping data for each Greenweez order
+        columns:
+          - name: orders_id
+            description: primary key of the table, identifier of the order
+            tests:
+              - unique
+              - not_null
+          - name: shipping_fee
+            description: shipping fee paid by the customer
+          - name: shipping_fee_1
+            description: duplicate of shipping_fee, identical values
+          - name: logcost
+            description: logistics cost of preparing the order
+          - name: ship_cost
+            description: cost of shipping paid by Greenweez to the carrier
